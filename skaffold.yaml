@@ -16,19 +16,19 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
-    # - image: hmatwiejczyk/client
-    #   context: client
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: '**/*.js'
-    #         dest: .
-    # - image: hmatwiejczyk/tickets
-    #   context: tickets
-    #   docker:
-    #     dockerfile: Dockerfile
-    #   sync:
-    #     manual:
-    #       - src: 'src/**/*.ts'
-    #         dest: .
+    - image: hmatwiejczyk/client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: '**/*.js'
+            dest: .
+    - image: hmatwiejczyk/tickets
+      context: tickets
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
