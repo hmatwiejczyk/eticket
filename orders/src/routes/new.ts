@@ -1,14 +1,52 @@
 import express, { Router, Request, Response } from 'express';
-// import { orders } from '../model/orders';
+import mongoose from 'mongoose';
+import {
+  requireAuth,
+  validateRequest,
+  NotFoundError,
+  OrderStatus,
+  BadRequestError,
+} from '@hmtickets/common';
+import { body } from 'express-validator';
+import { Ticket } from '../model/ticket';
+import { Order } from '../model/order';
 
 const router: Router = express.Router();
 
+const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+
 router.post(
   '/api/orders',
+  requireAuth,
+  [
+    body('ticketId')
+      .not()
+      .isEmpty()
+      .custom((input: string) => mongoose.Types.ObjectId.isValid(input))
+      .withMessage('ticket id must be provided'),
+  ],
+  validateRequest,
   async (req: Request, res: Response) => {
-    // const tickets = await Ticket.find({});
-    // res.status(200).send(tickets); 
-    res.send({});
+    const { ticketId } = req.body;
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      throw new NotFoundError();
+    }
+    const isReserved = await ticket.isReserved();
+    if (isReserved) {
+      throw new BadRequestError('Ticket is reserved');
+    }
+    const expiration = new Date();
+    expiration.setSeconds(expiration.getSeconds() + EXPIRATION_WINDOW_SECONDS);
+
+    const order = Order.build({
+      userId: req.currentUser!.id,
+      status: OrderStatus.Created,
+      expiresAt: expiration,
+      ticket,
+    });
+    await order.save();
+    res.status(201).send(order);
   }
 );
 
