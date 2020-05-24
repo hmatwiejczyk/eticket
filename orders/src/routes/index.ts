@@ -1,15 +1,14 @@
 import express, { Router, Request, Response } from 'express';
-// import { orders } from '../model/orders';
+import { requireAuth } from '@hmtickets/common';
+import { Order } from '../model/order';
 
 const router: Router = express.Router();
 
-router.get(
-  '/api/orders',
-  async (req: Request, res: Response) => {
-    // const tickets = await Ticket.find({});
-    // res.status(200).send(tickets); 
-    res.send({});
-  }
-);
+router.get('/api/orders', requireAuth, async (req: Request, res: Response) => {
+  const orders = await Order.find({
+    userId: req.currentUser!.id,
+  }).populate('ticket');
+  res.send(orders);
+});
 
 export { router as indexOrderRouter };
