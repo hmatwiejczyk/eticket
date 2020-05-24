@@ -1,14 +1,22 @@
 import express, { Router, Request, Response } from 'express';
-// import { orders } from '../model/orders';
+import { requireAuth, NotFoundError, NotAuthorizedError } from '@hmtickets/common';
+import { Order } from '../model/order';
 
 const router: Router = express.Router();
 
 router.get(
   '/api/orders/:orderId',
+  requireAuth,
   async (req: Request, res: Response) => {
-    // const tickets = await Ticket.find({});
-    // res.status(200).send(tickets); 
-    res.send({});
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate('ticket');
+    if (!order) {
+      throw new NotFoundError();
+    }
+    if (order.userId !== req.currentUser!.id) {
+      throw new NotAuthorizedError();
+    }
+    res.send(order);
   }
 );
 
