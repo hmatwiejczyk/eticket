@@ -51,12 +51,12 @@ ticketSchema.statics.build = (attrs: TicketAttrs) =>
     title: attrs.title,
     price: attrs.price,
   });
-ticketSchema.statics.findByEvent = (event: {id: string, version: number}) => {
+ticketSchema.statics.findByEvent = (event: { id: string; version: number }) => {
   return Ticket.findOne({
     _id: event.id,
-    version: event.version - 1
+    version: event.version - 1,
   });
-}
+};
 ticketSchema.methods.isReserved = async function () {
   const existingOrder = await Order.findOne({
     ticket: this,
@@ -73,6 +73,14 @@ ticketSchema.methods.isReserved = async function () {
 
 ticketSchema.set('versionKey', 'version');
 ticketSchema.plugin(updateIfCurrentPlugin);
+
+// ticketSchema.pre('save', function (done) {
+//   // @ts-ignore
+//   this.$where = {
+//     version: this.get('version') - 1,
+//   };
+//   done();
+// });
 
 const Ticket = mongoose.model<TicketDoc, TicketModel>('Ticket', ticketSchema);
 
