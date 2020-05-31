@@ -1,5 +1,6 @@
 import { TicketDoc } from './ticket';
 import mongoose from 'mongoose';
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 import { OrderStatus } from '@hmtickets/common';
 
 interface OrderAttrs {
@@ -14,38 +15,45 @@ interface OrderDoc extends mongoose.Document {
   status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
+  version: number;
 }
 
 interface OrderModel extends mongoose.Model<OrderDoc> {
   build(attrs: OrderAttrs): OrderDoc;
 }
 
-const orderSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
+const orderSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: Object.values(OrderStatus),
+      default: OrderStatus.Created,
+    },
+    expiresAt: {
+      type: mongoose.Schema.Types.Date,
+    },
+    ticket: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Ticket',
+    },
   },
-  status: {
-    type: String,
-    required: true,
-    enum: Object.values(OrderStatus),
-    default: OrderStatus.Created
-  },
-  expiresAt: {
-    type: mongoose.Schema.Types.Date,
-  },
-  ticket: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Ticket',
-  },
-}, {
-  toJSON: {
-    transform(doc, ret) {
-      ret.id = ret._id;
-      delete ret._id;
-    }
+  {
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
   }
-});
+);
+
+orderSchema.set('versionKey', 'version');
+orderSchema.plugin(updateIfCurrentPlugin);
 
 orderSchema.statics.build = (attrs: OrderAttrs) => new Order(attrs);
 
