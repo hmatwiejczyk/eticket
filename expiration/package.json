@@ -19,7 +19,7 @@
   "author": "hmatwiejczyk",
   "license": "ISC",
   "dependencies": {
-    "@hmtickets/common": "^1.0.9",
+    "@hmtickets/common": "^1.0.10",
     "@types/bull": "^3.14.0",
     "bull": "^3.14.0",
     "node-nats-streaming": "^0.3.2",
