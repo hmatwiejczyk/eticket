@@ -4,10 +4,11 @@ import mongoose from 'mongoose';
 import { Order } from '../../models/order';
 import { OrderStatus } from '@hmtickets/common';
 import { stripe } from '../../stripe';
+import { Payment } from '../../models/payment';
 
 jest.mock('../../stripe');
 
-it('returns a 404 when purchasing an order that does not exist', async () => {
+test('returns a 404 when purchasing an order that does not exist', async () => {
   await request(app)
     .post('/api/payments')
     .set('Cookie', global.signin())
@@ -18,7 +19,7 @@ it('returns a 404 when purchasing an order that does not exist', async () => {
     .expect(404);
 });
 
-it('returns a 401 when purchasing an order that doesnt belong to the user', async () => {
+test('returns a 401 when purchasing an order that doesnt belong to the user', async () => {
   const order = Order.build({
     id: mongoose.Types.ObjectId().toHexString(),
     userId: mongoose.Types.ObjectId().toHexString(),
@@ -38,7 +39,7 @@ it('returns a 401 when purchasing an order that doesnt belong to the user', asyn
     .expect(401);
 });
 
-it('returns a 400 when purchasing a cancelled order', async () => {
+test('returns a 400 when purchasing a cancelled order', async () => {
   const userId = mongoose.Types.ObjectId().toHexString();
   const order = Order.build({
     id: mongoose.Types.ObjectId().toHexString(),
@@ -59,7 +60,7 @@ it('returns a 400 when purchasing a cancelled order', async () => {
     .expect(400);
 });
 
-it('returns a 204 with valid inputs', async () => {
+test('returns a 201 with valid inputs', async () => {
   const userId = mongoose.Types.ObjectId().toHexString();
   const order = Order.build({
     id: mongoose.Types.ObjectId().toHexString(),
@@ -83,4 +84,10 @@ it('returns a 204 with valid inputs', async () => {
   expect(chargeOptions.source).toEqual('tok_visa');
   expect(chargeOptions.amount).toEqual(20 * 100);
   expect(chargeOptions.currency).toEqual('pln');
+
+  const payment = await Payment.findOne({
+    orderId: order.id,
+    stripeId: 'fdsfsd',
+  });
+  expect(payment).not.toBeNull();
 });
