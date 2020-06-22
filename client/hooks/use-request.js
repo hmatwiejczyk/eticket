@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { useState } from "react";
-
+import { useState } from 'react';
 
 export default ({ url, method, body, onSuccess }) => {
   const [errors, setErrors] = useState(null);
 
-  const doRequest = async() => {
+  const doRequest = async () => {
     try {
       setErrors(null);
       const response = await axios[method](url, body);
@@ -24,6 +23,6 @@ export default ({ url, method, body, onSuccess }) => {
         </div>
       );
     }
-  }
-  return {doRequest, errors};
-}
+  };
+  return { doRequest, errors };
+};
