@@ -1,5 +1,4 @@
 const OrderIndex = ({ orders }) => {
-  console.log(orders);
   return (
     <ul>
       {orders.map((order) => {
